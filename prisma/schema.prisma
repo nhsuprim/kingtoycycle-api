@@ -1,0 +1,302 @@
+// Prisma schema — E-Commerce Management & Analytics Platform
+// Database: MongoDB
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Auth / Staff (Section 17, 18)
+// ---------------------------------------------------------------------------
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+}
+
+model User {
+  id           String     @id @default(auto()) @map("_id") @db.ObjectId
+  name         String
+  email        String     @unique
+  passwordHash String
+  status       UserStatus @default(ACTIVE)
+
+  roleId String? @db.ObjectId
+  role   Role?   @relation(fields: [roleId], references: [id])
+
+  otpCode         String?
+  otpExpiresAt    DateTime?
+  otpAttemptCount Int       @default(0)
+  otpLastSentAt   DateTime?
+
+  refreshTokenHash String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+model Role {
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
+  name        String  @unique
+  description String?
+
+  permissionIds String[]     @db.ObjectId
+  permissions   Permission[] @relation(fields: [permissionIds], references: [id])
+
+  users User[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("roles")
+}
+
+model Permission {
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
+  key         String  @unique
+  description String?
+
+  roleIds String[] @db.ObjectId
+  roles   Role[]   @relation(fields: [roleIds], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@map("permissions")
+}
+
+// ---------------------------------------------------------------------------
+// Catalog (Section 5, 6, 7)
+// ---------------------------------------------------------------------------
+
+enum Status {
+  ACTIVE
+  INACTIVE
+}
+
+model Category {
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  image       String?
+  description String?
+  status      Status  @default(ACTIVE)
+
+  products Product[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("categories")
+}
+
+model Product {
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  description String
+  sku         String  @unique
+  color       String
+  brand       String?
+
+  featured Boolean @default(false)
+
+  regularPrice  Float
+  discountPrice Float?
+  stockStatus   ProductStatus @default(IN_STOCK)
+
+  thumbnailImage    String
+  thumbnailPublicId String?
+  images            String[]
+  imagePublicIds    String[]
+
+  categoryId String   @db.ObjectId
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  orderItems OrderItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([categoryId])
+  @@map("products")
+}
+
+enum ProductStatus {
+  IN_STOCK
+  OUT_OF_STOCK
+  DISCONTINUED
+}
+
+// ---------------------------------------------------------------------------
+// Orders (Section 9, 12, 28, 35)
+// ---------------------------------------------------------------------------
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  RETURNED
+  REFUNDED
+}
+
+enum PaymentStatus {
+  UNPAID
+  PAID
+  REFUNDED
+}
+
+enum ShippingArea {
+  DHAKA
+  OUTSIDE_DHAKA
+}
+
+enum PaymentMethodType {
+  COD
+}
+
+model Order {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  orderNumber String @unique
+
+  customerName String
+  phone        String
+  email        String?
+  address      String
+  area         ShippingArea
+
+  items OrderItem[]
+
+  subtotal       Float
+  shippingCost   Float
+  couponDiscount Float @default(0)
+  totalAmount    Float
+
+  couponId String? @db.ObjectId
+  coupon   Coupon? @relation(fields: [couponId], references: [id])
+
+  paymentMethod PaymentMethodType @default(COD)
+  paymentStatus PaymentStatus     @default(UNPAID)
+
+  orderStatus OrderStatus @default(PENDING)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([phone])
+  @@map("orders")
+}
+
+// Snapshot of product at time of order (Section 28)
+model OrderItem {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  orderId String @db.ObjectId
+  order   Order  @relation(fields: [orderId], references: [id])
+
+  productId String  @db.ObjectId
+  product   Product @relation(fields: [productId], references: [id])
+
+  productName String
+  productCode String
+  price       Float
+  quantity    Int
+
+  @@map("order_items")
+}
+
+// ---------------------------------------------------------------------------
+// Coupon (Section 14)
+// ---------------------------------------------------------------------------
+
+enum DiscountType {
+  PERCENTAGE
+  FIXED
+}
+
+model Coupon {
+  id            String       @id @default(auto()) @map("_id") @db.ObjectId
+  code          String       @unique
+  discountType  DiscountType
+  discountValue Float
+
+  minimumOrderAmount Float?
+  maximumDiscount    Float?
+
+  startDate  DateTime
+  expiryDate DateTime
+
+  usageLimit            Int?
+  perCustomerUsageLimit Int?
+
+  applicableToAll       Boolean  @default(false)
+  applicableProductIds  String[] @db.ObjectId
+  applicableCategoryIds String[] @db.ObjectId
+
+  status Status @default(ACTIVE)
+
+  orders Order[]
+  usages CouponUsage[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("coupons")
+}
+
+model CouponUsage {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  couponId String @db.ObjectId
+  coupon   Coupon @relation(fields: [couponId], references: [id])
+
+  phone   String
+  orderId String @db.ObjectId
+
+  usedAt DateTime @default(now())
+
+  @@map("coupon_usages")
+}
+
+model ShippingSettings {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  insideDhakaCharge   Float   @default(60)
+  outsideDhakaCharge  Float   @default(120)
+  freeDeliveryEnabled Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("shipping_settings")
+}
+
+model CustomerEvent {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  eventType String
+  sessionId String?
+  phone     String?
+
+  productId String? @db.ObjectId
+  page      String?
+
+  metadata Json?
+
+  ipAddress String?
+  userAgent String?
+
+  createdAt DateTime @default(now())
+
+  @@index([eventType])
+  @@index([createdAt])
+  @@index([productId])
+  @@map("customer_events")
+}
