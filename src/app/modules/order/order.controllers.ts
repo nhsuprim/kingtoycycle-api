@@ -57,7 +57,9 @@ const getOrderById = async (
 
 const trackOrder = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const result = await orderService.trackOrder(req.body);
+        const { orderNumber } = req.body;
+
+        const result = await orderService.trackOrder(orderNumber);
 
         return sendSuccess(res, 200, {
             message: "Order found",

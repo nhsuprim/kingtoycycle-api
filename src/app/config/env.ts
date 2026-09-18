@@ -60,4 +60,9 @@ export const env = {
         accessToken: process.env.META_ACCESS_TOKEN || "",
         testEventCode: process.env.META_TEST_EVENT_CODE || "",
     },
+
+    telegram: {
+        botToken: process.env.TELEGRAM_BOT_TOKEN || "",
+        chatId: process.env.TELEGRAM_CHAT_ID || "",
+    },
 };

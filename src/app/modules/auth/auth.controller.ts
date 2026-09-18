@@ -4,20 +4,20 @@ import { sendSuccess } from "../../helpers/ApiResponse";
 import { env } from "../../config/env";
 import { authService } from "./auth.service";
 
-const REFRESH_COOKIE_OPTIONS = {
-    httpOnly: true,
-    secure: env.cookie.secure,
-    sameSite: "strict" as const,
-    path: "/api/auth",
-    maxAge: 7 * 24 * 60 * 60 * 1000,
-};
-
 const ACCESS_COOKIE_OPTIONS = {
     httpOnly: true,
-    secure: env.cookie.secure,
-    sameSite: "strict" as const,
+    secure: env.isProduction,
+    sameSite: env.isProduction ? ("none" as const) : ("lax" as const),
     path: "/",
     maxAge: 15 * 60 * 1000,
+};
+
+const REFRESH_COOKIE_OPTIONS = {
+    httpOnly: true,
+    secure: env.isProduction,
+    sameSite: env.isProduction ? ("none" as const) : ("lax" as const),
+    path: "/api/v1/auth",
+    maxAge: 30 * 24 * 60 * 60 * 1000,
 };
 
 const login = asyncHandler(async (req: Request, res: Response) => {
@@ -88,7 +88,7 @@ const logout = asyncHandler(async (req: Request, res: Response) => {
     });
 
     res.clearCookie("refreshToken", {
-        path: "/api/auth",
+        path: "/api/v1/auth",
     });
 
     return sendSuccess(res, 200, {

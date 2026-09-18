@@ -17,16 +17,34 @@ const addProduct = async (req: Request, res: Response, next: NextFunction) => {
 
 const getProducts = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { categoryId, brand, stockStatus, search } = req.query;
+        const {
+            categoryId,
+            brand,
+            stockStatus,
+            search,
+            color,
+            minPrice,
+            maxPrice,
+            minRating,
+            sort,
+            limit,
+        } = req.query;
 
         const result = await productService.getAllProducts({
             categoryId: categoryId as string,
             brand: brand as string,
             stockStatus: stockStatus as string,
             search: search as string,
+            color: color as string,
+            minPrice: minPrice as string,
+            maxPrice: maxPrice as string,
+            minRating: minRating as string,
+            sort: sort as string,
+            limit: limit as string,
         });
 
-        return sendSuccess(res, 200, {
+        res.status(200).json({
+            success: true,
             message: "Products retrieved successfully",
             data: result,
         });

@@ -16,7 +16,8 @@ const PERMISSIONS = [
     "SALES_REPORT_VIEW",
     "STAFF_MANAGE",
     "SHIPPING_MANAGE",
-    "ANALYTICS_VIEW" // ⬅️ নতুন
+    "ANALYTICS_VIEW",
+    "REVIEW_MANAGE",
 ];
 
 async function main() {

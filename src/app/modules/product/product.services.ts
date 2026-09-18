@@ -67,25 +67,106 @@ const getAllProducts = async (query: {
     brand?: string;
     stockStatus?: string;
     search?: string;
+    color?: string;
+    minPrice?: string;
+    maxPrice?: string;
+    minRating?: string;
+    sort?: string;
+    limit?: string;
 }) => {
-    const where: any = {};
+    const andConditions: any[] = [];
 
-    if (query.categoryId) where.categoryId = query.categoryId;
-    if (query.brand) where.brand = { equals: query.brand, mode: "insensitive" };
-    if (query.stockStatus) where.stockStatus = query.stockStatus;
+    if (query.categoryId) andConditions.push({ categoryId: query.categoryId });
+    if (query.brand)
+        andConditions.push({
+            brand: { equals: query.brand, mode: "insensitive" },
+        });
+    if (query.stockStatus)
+        andConditions.push({ stockStatus: query.stockStatus });
+    if (query.color)
+        andConditions.push({
+            color: { equals: query.color, mode: "insensitive" },
+        });
 
     if (query.search) {
-        where.OR = [
-            { name: { contains: query.search, mode: "insensitive" } },
-            { sku: { contains: query.search, mode: "insensitive" } },
-        ];
+        andConditions.push({
+            OR: [
+                { name: { contains: query.search, mode: "insensitive" } },
+                { sku: { contains: query.search, mode: "insensitive" } },
+            ],
+        });
     }
 
-    return prisma.product.findMany({
+    if (query.minRating) {
+        andConditions.push({ averageRating: { gte: Number(query.minRating) } });
+    }
+
+    // effective price = discountPrice ?? regularPrice, তাই দুই case-এ OR দিয়ে filter করা লাগবে
+    if (query.minPrice || query.maxPrice) {
+        const min = query.minPrice ? Number(query.minPrice) : undefined;
+        const max = query.maxPrice ? Number(query.maxPrice) : undefined;
+
+        andConditions.push({
+            OR: [
+                {
+                    discountPrice: {
+                        not: null,
+                        ...(min !== undefined ? { gte: min } : {}),
+                        ...(max !== undefined ? { lte: max } : {}),
+                    },
+                },
+                {
+                    discountPrice: null,
+                    regularPrice: {
+                        ...(min !== undefined ? { gte: min } : {}),
+                        ...(max !== undefined ? { lte: max } : {}),
+                    },
+                },
+            ],
+        });
+    }
+
+    const where = andConditions.length > 0 ? { AND: andConditions } : {};
+
+    let products = await prisma.product.findMany({
         where,
         include: { category: true },
-        orderBy: { createdAt: "desc" },
     });
+
+    // effective price/rating দিয়ে JS-level sort (DB-তে virtual column সহজে sort করা যায় না)
+    const getEffectivePrice = (p: (typeof products)[number]) =>
+        p.discountPrice ?? p.regularPrice;
+
+    switch (query.sort) {
+        case "price_asc":
+            products = products.sort(
+                (a, b) => getEffectivePrice(a) - getEffectivePrice(b),
+            );
+            break;
+        case "price_desc":
+            products = products.sort(
+                (a, b) => getEffectivePrice(b) - getEffectivePrice(a),
+            );
+            break;
+        case "rating":
+            products = products.sort(
+                (a, b) => b.averageRating - a.averageRating,
+            );
+            break;
+        case "newest":
+        default:
+            products = products.sort(
+                (a, b) =>
+                    new Date(b.createdAt).getTime() -
+                    new Date(a.createdAt).getTime(),
+            );
+    }
+
+    if (query.limit) {
+        products = products.slice(0, Number(query.limit));
+    }
+
+    return products;
 };
 
 const getProductById = async (id: string) => {

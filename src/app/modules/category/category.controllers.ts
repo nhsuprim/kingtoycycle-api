@@ -10,7 +10,7 @@ const addCategory = async (req: Request, res: Response, next: NextFunction) => {
             message: "Category added successfully",
             data: result,
         });
-    } catch (error: any) {
+    } catch (error) {
         next(error);
     }
 };
@@ -28,11 +28,10 @@ const getCategories = async (
             message: "Categories retrieved successfully",
             data: result,
         });
-    } catch (error: any) {
+    } catch (error) {
         next(error);
     }
 };
-// get category by id
 
 const getCategoryById = async (
     req: Request,
@@ -54,26 +53,7 @@ const getCategoryById = async (
             message: "Category retrieved successfully",
             data: result,
         });
-    } catch (error: any) {
-        next(error);
-    }
-};
-
-//delete category by id
-
-const deleteCategory = async (
-    req: Request,
-    res: Response,
-    next: NextFunction,
-) => {
-    try {
-        const result = await categoryService.deleteCategory(req.params.id);
-        res.status(200).json({
-            success: true,
-            message: "Category deleted successfully",
-            data: result,
-        });
-    } catch (error: any) {
+    } catch (error) {
         next(error);
     }
 };
@@ -84,16 +64,56 @@ const updateCategory = async (
     next: NextFunction,
 ) => {
     try {
-        const result = await categoryService.updateCategory(
-            req.params.id,
-            req.body,
-        );
+        const result = await categoryService.updateCategory(req);
+
         res.status(200).json({
             success: true,
             message: "Category updated successfully",
             data: result,
         });
-    } catch (error: any) {
+    } catch (error) {
+        next(error);
+    }
+};
+
+const deleteCategory = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) => {
+    try {
+        const result = await categoryService.deleteCategory(req.params.id);
+
+        res.status(200).json({
+            success: true,
+            message: "Category deleted successfully",
+            data: result,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+const getCategoryBySlug = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) => {
+    try {
+        const result = await categoryService.getCategoryBySlug(req.params.slug);
+
+        if (!result) {
+            return res
+                .status(404)
+                .json({ success: false, message: "Category not found" });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Category retrieved successfully",
+            data: result,
+        });
+    } catch (error) {
         next(error);
     }
 };
@@ -102,6 +122,7 @@ export const categoryController = {
     addCategory,
     getCategories,
     getCategoryById,
-    deleteCategory,
+    getCategoryBySlug,
     updateCategory,
+    deleteCategory,
 };

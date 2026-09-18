@@ -39,16 +39,11 @@ const updatePaymentStatus = z.object({
     paymentStatus: z.enum(["UNPAID", "PAID", "REFUNDED"]),
 });
 
-const trackOrder = z
-    .object({
-        orderNumber: z.string().optional(),
-
-        phone: z.string().optional(),
-    })
-    .refine((data) => data.orderNumber || data.phone, {
-        message: "Order number or phone number is required",
-        path: ["orderNumber"],
-    });
+const trackOrder = z.object({
+    orderNumber: z
+        .string({ required_error: "Order number is required" })
+        .min(1),
+});
 
 export const orderValidation = {
     createOrder,
