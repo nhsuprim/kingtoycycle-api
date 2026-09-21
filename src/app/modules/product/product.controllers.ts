@@ -26,6 +26,7 @@ const getProducts = async (req: Request, res: Response, next: NextFunction) => {
             minPrice,
             maxPrice,
             minRating,
+            featured,
             sort,
             limit,
         } = req.query;
@@ -39,6 +40,7 @@ const getProducts = async (req: Request, res: Response, next: NextFunction) => {
             minPrice: minPrice as string,
             maxPrice: maxPrice as string,
             minRating: minRating as string,
+            featured: featured as string,
             sort: sort as string,
             limit: limit as string,
         });

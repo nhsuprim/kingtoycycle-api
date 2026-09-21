@@ -10,6 +10,7 @@ import { reportRoutes } from "../modules/report/report.routes";
 import { eventRoutes } from "../modules/event/event.routes";
 import { roleRoutes } from "../modules/role/role.routes";
 import { reviewRoutes } from "../modules/review/review.routes";
+import { homepageRoutes } from "../modules/homepage/homepage.routes";
 
 const router = express.Router();
 
@@ -57,6 +58,10 @@ const moduleRoutes = [
     {
         path: "/review",
         route: reviewRoutes,
+    },
+    {
+        path: "/homepage",
+        route: homepageRoutes,
     },
 
     // {

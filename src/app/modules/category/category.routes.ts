@@ -11,7 +11,10 @@ router.post(
     "/",
     authenticate,
     authorize("CATEGORY_MANAGE"),
-    fileUploader.upload.fields([{ name: "file", maxCount: 1 }]),
+    fileUploader.upload.fields([
+        { name: "file", maxCount: 1 },
+        { name: "bannerImage", maxCount: 1 },
+    ]),
     (req: Request, res: Response, next: NextFunction) => {
         try {
             req.body = categoryValidation.addCategory.parse(
@@ -32,7 +35,11 @@ router.patch(
     "/:id",
     authenticate,
     authorize("CATEGORY_MANAGE"),
-    fileUploader.upload.fields([{ name: "file", maxCount: 1 }]),
+    fileUploader.upload.fields([
+        { name: "file", maxCount: 1 },
+        { name: "bannerImage", maxCount: 1 },
+    ]),
+
     (req: Request, res: Response, next: NextFunction) => {
         try {
             req.body = categoryValidation.updateCategory.parse(

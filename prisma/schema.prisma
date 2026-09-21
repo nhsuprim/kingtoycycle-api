@@ -85,6 +85,7 @@ model Category {
   id          String  @id @default(auto()) @map("_id") @db.ObjectId
   name        String
   image       String?
+  bannerimage String?
   description String?
   status      Status  @default(ACTIVE)
   slug        String  @unique
@@ -209,11 +210,11 @@ model OrderItem {
   productId String  @db.ObjectId
   product   Product @relation(fields: [productId], references: [id])
 
-  productName   String
-  productCode   String
-  productImage  String? 
-  price       Float
-  quantity    Int
+  productName  String
+  productCode  String
+  productImage String?
+  price        Float
+  quantity     Int
 
   @@map("order_items")
 }
@@ -325,4 +326,18 @@ model Review {
 
   @@index([productId])
   @@map("reviews")
+}
+
+model Banner {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  title String
+  image String
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("banners")
 }

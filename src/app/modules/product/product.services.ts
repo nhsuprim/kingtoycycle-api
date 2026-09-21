@@ -71,6 +71,7 @@ const getAllProducts = async (query: {
     minPrice?: string;
     maxPrice?: string;
     minRating?: string;
+    featured?: string;
     sort?: string;
     limit?: string;
 }) => {

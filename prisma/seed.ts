@@ -18,6 +18,9 @@ const PERMISSIONS = [
     "SHIPPING_MANAGE",
     "ANALYTICS_VIEW",
     "REVIEW_MANAGE",
+    "BANNER_CREATE",
+    "BANNER_UPDATE",
+    "BANNER_DELETE",
 ];
 
 async function main() {

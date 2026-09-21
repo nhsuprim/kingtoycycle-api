@@ -5,12 +5,20 @@ import prisma from "../../shared/prisma";
 import { slugify } from "../../utils/slugify";
 
 const addCategory = async (req: Request) => {
-    const files = req.files as { file?: IFile[] };
+    const files = req.files as { file?: IFile[]; bannerImage?: IFile[] };
+
     const imageFile = files?.file?.[0];
+    const bannerFile = files?.bannerImage?.[0];
 
     if (imageFile) {
         const uploaded = await fileUploader.uploadToCloudinary(imageFile);
         req.body.image = uploaded.secure_url;
+    }
+
+    if (bannerFile) {
+        const uploadedBanner =
+            await fileUploader.uploadToCloudinary(bannerFile);
+        req.body.bannerimage = uploadedBanner.secure_url;
     }
 
     const { name } = req.body;
@@ -30,7 +38,7 @@ const addCategory = async (req: Request) => {
     let slug = slugify(name);
     const slugExists = await prisma.category.findUnique({ where: { slug } });
     if (slugExists) {
-        slug = `${slug}-${Date.now().toString().slice(-4)}`; // duplicate হলে unique করে নিলো
+        slug = `${slug}-${Date.now().toString().slice(-4)}`;
     }
 
     const result = await prisma.category.create({
@@ -38,12 +46,14 @@ const addCategory = async (req: Request) => {
             name: req.body.name,
             slug,
             image: req.body.image,
+            bannerimage: req.body.bannerimage,
             description: req.body.description,
         },
     });
 
     return result;
 };
+
 const getAllCategories = async () => {
     return prisma.category.findMany({ orderBy: { createdAt: "desc" } });
 };
@@ -59,12 +69,20 @@ const updateCategory = async (req: Request) => {
         where: { id },
     });
 
-    const files = req.files as { file?: IFile[] };
+    const files = req.files as { file?: IFile[]; bannerImage?: IFile[] };
+
     const imageFile = files?.file?.[0];
+    const bannerFile = files?.bannerImage?.[0];
 
     if (imageFile) {
         const uploaded = await fileUploader.uploadToCloudinary(imageFile);
         req.body.image = uploaded.secure_url;
+    }
+
+    if (bannerFile) {
+        const uploadedBanner =
+            await fileUploader.uploadToCloudinary(bannerFile);
+        req.body.bannerimage = uploadedBanner.secure_url;
     }
 
     if (req.body.name && req.body.name !== existingCategory.name) {
@@ -84,6 +102,7 @@ const updateCategory = async (req: Request) => {
         data: { ...req.body },
     });
 };
+
 const deleteCategory = async (id: string) => {
     await prisma.category.findUniqueOrThrow({ where: { id } });
 
