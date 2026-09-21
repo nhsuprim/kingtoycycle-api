@@ -1,41 +1,39 @@
 import express, { Application, NextFunction, Request, Response } from "express";
+
 import dotenv from "dotenv";
 import cors from "cors";
-
 import cookieParser from "cookie-parser";
-
 import httpStatus from "http-status";
+
 import globalErrorHandler from "./app/middlewares/globalErrorHandle";
 import router from "./app/routes";
-import { env } from "./app/config/env";
-// import globalErrorHandler from "./app/middleware/globalErrorHandle";
+
+dotenv.config();
 
 const app: Application = express();
-// app.use(cors());
-const allowedOrigins = [
-    "http://localhost:3000",
-    "https://kingtoycycle-ui.vercel.app",
-];
+
+// ===============================
+// Parsers
+// ===============================
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+
+// ===============================
+// CORS
+// ===============================
 
 app.use(
     cors({
-        origin: (origin, callback) => {
-            if (!origin || allowedOrigins.includes(origin)) {
-                callback(null, true);
-            } else {
-                callback(new Error("Not allowed by CORS"));
-            }
-        },
+        origin: process.env.CLIENT_URL,
         credentials: true,
     }),
 );
-app.use(cookieParser());
-dotenv.config();
 
-//parser
-app.use(express.json());
-
-app.use(express.urlencoded({ extended: true }));
+// ===============================
+// Health Check
+// ===============================
 
 app.get("/", (req: Request, res: Response) => {
     res.send({
@@ -43,7 +41,15 @@ app.get("/", (req: Request, res: Response) => {
     });
 });
 
+// ===============================
+// API Routes
+// ===============================
+
 app.use("/api/v1", router);
+
+// ===============================
+// Not Found
+// ===============================
 
 app.use((req: Request, res: Response, next: NextFunction) => {
     res.status(httpStatus.NOT_FOUND).json({
@@ -55,6 +61,11 @@ app.use((req: Request, res: Response, next: NextFunction) => {
         },
     });
 });
+
+// ===============================
+// Global Error Handler
+// ===============================
+
 app.use(globalErrorHandler);
 
 export default app;

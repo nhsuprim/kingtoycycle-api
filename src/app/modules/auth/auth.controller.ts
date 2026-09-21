@@ -6,16 +6,16 @@ import { authService } from "./auth.service";
 
 const ACCESS_COOKIE_OPTIONS = {
     httpOnly: true,
-    secure: env.isProduction,
-    sameSite: env.isProduction ? ("none" as const) : ("lax" as const),
+    secure: true,
+    sameSite: "none" as const,
     path: "/",
     maxAge: 15 * 60 * 1000,
 };
 
 const REFRESH_COOKIE_OPTIONS = {
     httpOnly: true,
-    secure: env.isProduction,
-    sameSite: env.isProduction ? ("none" as const) : ("lax" as const),
+    secure: true,
+    sameSite: "none" as const,
     path: "/",
     maxAge: 30 * 24 * 60 * 60 * 1000,
 };
