@@ -178,25 +178,25 @@ const createOrder = async (input: CreateOrderInput) => {
         })
         .catch(() => {});
 
-    // // ---- Telegram — Admin-কে instant notification ----
-    // notificationService
-    //     .sendOrderNotification({
-    //         orderNumber: order.orderNumber,
-    //         customerName: order.customerName,
-    //         phone: order.phone,
-    //         address: order.address,
-    //         area: order.area,
-    //         items: orderItemsData.map((item) => ({
-    //             productName: item.productName,
-    //             quantity: item.quantity,
-    //             price: item.price,
-    //         })),
-    //         subtotal: order.subtotal,
-    //         shippingCost: order.shippingCost,
-    //         couponDiscount: order.couponDiscount,
-    //         totalAmount: order.totalAmount,
-    //     })
-    //     .catch(() => {});
+    // ---- Telegram — Admin-কে instant notification ----
+    notificationService
+        .sendOrderNotification({
+            orderNumber: order.orderNumber,
+            customerName: order.customerName,
+            phone: order.phone,
+            address: order.address,
+            area: order.area,
+            items: orderItemsData.map((item) => ({
+                productName: item.productName,
+                quantity: item.quantity,
+                price: item.price,
+            })),
+            subtotal: order.subtotal,
+            shippingCost: order.shippingCost,
+            couponDiscount: order.couponDiscount,
+            totalAmount: order.totalAmount,
+        })
+        .catch(() => {});
 
     return order;
 };
