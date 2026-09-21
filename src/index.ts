@@ -34,7 +34,7 @@
 // bootstrap();
 import app from "./app";
 
-const port = 8000;
+const port = 5000;
 
 async function main() {
     const server = app.listen(port, () => {
