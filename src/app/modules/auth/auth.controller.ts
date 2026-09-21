@@ -16,7 +16,7 @@ const REFRESH_COOKIE_OPTIONS = {
     httpOnly: true,
     secure: env.isProduction,
     sameSite: env.isProduction ? ("none" as const) : ("lax" as const),
-    path: "/api/v1/auth",
+    path: "/",
     maxAge: 30 * 24 * 60 * 60 * 1000,
 };
 
@@ -42,7 +42,9 @@ const verifyOtp = asyncHandler(async (req: Request, res: Response) => {
 
     return sendSuccess(res, 200, {
         message: "Login successful",
-        data: { user },
+        data: {
+            user,
+        },
     });
 });
 
@@ -84,11 +86,17 @@ const logout = asyncHandler(async (req: Request, res: Response) => {
     }
 
     res.clearCookie("accessToken", {
+        httpOnly: true,
+        secure: env.isProduction,
+        sameSite: env.isProduction ? ("none" as const) : ("lax" as const),
         path: "/",
     });
 
     res.clearCookie("refreshToken", {
-        path: "/api/v1/auth",
+        httpOnly: true,
+        secure: env.isProduction,
+        sameSite: env.isProduction ? ("none" as const) : ("lax" as const),
+        path: "/",
     });
 
     return sendSuccess(res, 200, {
