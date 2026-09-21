@@ -7,11 +7,28 @@ import cookieParser from "cookie-parser";
 import httpStatus from "http-status";
 import globalErrorHandler from "./app/middlewares/globalErrorHandle";
 import router from "./app/routes";
+import { env } from "./app/config/env";
 // import globalErrorHandler from "./app/middleware/globalErrorHandle";
 
 const app: Application = express();
 // app.use(cors());
-app.use(cors());
+const allowedOrigins = [
+    "http://localhost:3000",
+    "https://kingtoycycle-ui.vercel.app",
+];
+
+app.use(
+    cors({
+        origin: (origin, callback) => {
+            if (!origin || allowedOrigins.includes(origin)) {
+                callback(null, true);
+            } else {
+                callback(new Error("Not allowed by CORS"));
+            }
+        },
+        credentials: true,
+    }),
+);
 app.use(cookieParser());
 dotenv.config();
 
