@@ -7,6 +7,8 @@ import { fileUploader } from "../../helpers/fileUploaders";
 
 const router = express.Router();
 
+router.get("/feed/meta.xml", productController.getMetaFeed);
+
 router.post(
     "/",
     authenticate,

@@ -3,6 +3,8 @@ import { prisma } from "../../config/db";
 import { ApiError } from "../../helpers/ApiError";
 import { fileUploader } from "../../helpers/fileUploaders";
 import { IFile } from "../../interface/file";
+import { env } from "../../config/env";
+import { xmlEscape } from "../../utils/xmlEscape";
 
 const addProduct = async (req: Request) => {
     const files = req.files as {
@@ -287,6 +289,51 @@ const deleteProduct = async (id: string) => {
     return prisma.product.delete({ where: { id } });
 };
 
+const getMetaProductFeed = async (): Promise<string> => {
+    const products = await prisma.product.findMany({
+        where: { stockStatus: { not: "DISCONTINUED" } },
+        include: { category: true },
+    });
+
+    const items = products
+        .map((p) => {
+            const price = p.regularPrice.toFixed(2);
+            const salePrice = p.discountPrice
+                ? p.discountPrice.toFixed(2)
+                : null;
+            const availability =
+                p.stockStatus === "IN_STOCK" ? "in stock" : "out of stock";
+            const productLink = `${env.clientUrl}/products/${p.id}`;
+
+            return `
+    <item>
+      <g:id>${p.id}</g:id>
+      <title>${xmlEscape(p.name)}</title>
+      <description><![CDATA[${p.description}]]></description>
+      <link>${productLink}</link>
+      <g:image_link>${p.thumbnailImage}</g:image_link>
+      <g:availability>${availability}</g:availability>
+      <g:price>${price} BDT</g:price>
+      ${salePrice ? `<g:sale_price>${salePrice} BDT</g:sale_price>` : ""}
+      <g:condition>new</g:condition>
+      <g:brand>${xmlEscape(p.brand || "King Toy Cycle")}</g:brand>
+      <g:product_type>${xmlEscape(p.category?.name ?? "General")}</g:product_type>
+      <g:google_product_category>Toys &amp; Games</g:google_product_category>
+    </item>`;
+        })
+        .join("");
+
+    return `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:g="http://base.google.com/ns/1.0">
+<channel>
+  <title>King Toy Cycle Product Feed</title>
+  <link>${env.clientUrl}</link>
+  <description>Product catalog feed for Meta Commerce Manager</description>
+  ${items}
+</channel>
+</rss>`;
+};
+
 export const productService = {
     addProduct,
     getAllProducts,
@@ -294,4 +341,5 @@ export const productService = {
     updateProduct,
     updateStockStatus,
     deleteProduct,
+    getMetaProductFeed,
 };

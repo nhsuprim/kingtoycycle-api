@@ -126,6 +126,16 @@ const deleteProduct = async (
     }
 };
 
+const getMetaFeed = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const xml = await productService.getMetaProductFeed();
+
+        res.setHeader("Content-Type", "application/xml; charset=utf-8");
+        res.status(200).send(xml);
+    } catch (error) {
+        next(error);
+    }
+};
 export const productController = {
     addProduct,
     getProducts,
@@ -133,4 +143,5 @@ export const productController = {
     updateProduct,
     updateStockStatus,
     deleteProduct,
+    getMetaFeed,
 };
