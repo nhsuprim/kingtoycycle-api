@@ -23,8 +23,9 @@ const updateProduct = z.object({
     color: z.string().min(1).optional(),
     brand: z.string().optional(),
     regularPrice: z.number().positive().optional(),
-    discountPrice: z.number().positive().optional(),
+    discountPrice: z.number().positive().nullable().optional(),
     categoryId: z.string().optional(),
+    featured: z.boolean().optional(),
 });
 
 const updateStockStatus = z.object({
