@@ -82,15 +82,15 @@ enum Status {
 }
 
 model Category {
-  id          String  @id @default(auto()) @map("_id") @db.ObjectId
-  name        String
-  image       String?
-  bannerimage String?
-  description String?
-  status      Status  @default(ACTIVE)
-  slug        String  @unique
-
-  products Product[]
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
+  name         String
+  image        String?
+  bannerimage  String?
+  description  String?
+  status       Status    @default(ACTIVE)
+  slug         String    @unique
+  serial_count Int?
+  products     Product[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
