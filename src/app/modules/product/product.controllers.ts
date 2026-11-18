@@ -136,6 +136,25 @@ const getMetaFeed = async (req: Request, res: Response, next: NextFunction) => {
         next(error);
     }
 };
+
+const getFacets = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { categoryId } = req.query;
+
+        const result = await productService.getProductFacets(
+            categoryId as string | undefined,
+        );
+
+        res.status(200).json({
+            success: true,
+            message: "Facets retrieved successfully",
+            data: result,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
 export const productController = {
     addProduct,
     getProducts,
@@ -144,4 +163,5 @@ export const productController = {
     updateStockStatus,
     deleteProduct,
     getMetaFeed,
+    getFacets,
 };

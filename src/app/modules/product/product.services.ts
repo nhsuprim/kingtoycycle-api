@@ -334,6 +334,19 @@ const getMetaProductFeed = async (): Promise<string> => {
 </rss>`;
 };
 
+const getProductFacets = async (categoryId?: string) => {
+    const rows = await prisma.product.findMany({
+        where: categoryId ? { categoryId } : {},
+        select: { color: true },
+    });
+
+    const colors = Array.from(
+        new Set(rows.map((r) => r.color.toLowerCase())),
+    ).sort();
+
+    return { colors };
+};
+
 export const productService = {
     addProduct,
     getAllProducts,
@@ -342,4 +355,5 @@ export const productService = {
     updateStockStatus,
     deleteProduct,
     getMetaProductFeed,
+    getProductFacets,
 };

@@ -4,8 +4,17 @@ import { categoryValidation } from "./category.validation";
 import { authenticate } from "../../middlewares/authenticate";
 import { authorize } from "../../middlewares/authorize";
 import { fileUploader } from "../../helpers/fileUploaders";
+import { cacheControl } from "../../middlewares/cacheControl";
 
 const router = express.Router();
+
+router.get("/", cacheControl(120), categoryController.getCategories);
+router.get(
+    "/slug/:slug",
+    cacheControl(120),
+    categoryController.getCategoryBySlug,
+);
+router.get("/:id", cacheControl(120), categoryController.getCategoryById);
 
 router.post(
     "/",
@@ -26,10 +35,6 @@ router.post(
         }
     },
 );
-
-router.get("/", categoryController.getCategories);
-
-router.get("/:id", categoryController.getCategoryById);
 
 router.patch(
     "/:id",
@@ -58,7 +63,5 @@ router.delete(
     authorize("CATEGORY_MANAGE"),
     categoryController.deleteCategory,
 );
-
-router.get("/slug/:slug", categoryController.getCategoryBySlug);
 
 export const categoryRoutes = router;

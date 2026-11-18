@@ -129,6 +129,10 @@ model Product {
   updatedAt DateTime @updatedAt
 
   @@index([categoryId])
+  @@index([featured])
+  @@index([stockStatus])
+  @@index([createdAt])
+  @@index([averageRating])
   @@map("products")
 }
 
@@ -197,6 +201,8 @@ model Order {
   updatedAt DateTime @updatedAt
 
   @@index([phone])
+  @@index([createdAt])
+  @@index([orderStatus])
   @@map("orders")
 }
 
@@ -216,6 +222,8 @@ model OrderItem {
   price        Float
   quantity     Int
 
+  @@index([orderId])
+  @@index([productId])
   @@map("order_items")
 }
 
@@ -269,6 +277,7 @@ model CouponUsage {
 
   usedAt DateTime @default(now())
 
+  @@index([couponId, phone])
   @@map("coupon_usages")
 }
 
@@ -339,5 +348,6 @@ model Banner {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@index([isActive])
   @@map("banners")
 }

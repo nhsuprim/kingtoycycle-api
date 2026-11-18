@@ -4,10 +4,14 @@ import { productValidation } from "./product.validation";
 import { authenticate } from "../../middlewares/authenticate";
 import { authorize } from "../../middlewares/authorize";
 import { fileUploader } from "../../helpers/fileUploaders";
+import { cacheControl } from "../../middlewares/cacheControl";
 
 const router = express.Router();
 
-router.get("/feed/meta.xml", productController.getMetaFeed);
+router.get("/feed/meta.xml", cacheControl(3600), productController.getMetaFeed);
+router.get("/facets", productController.getFacets);
+router.get("/", cacheControl(30), productController.getProducts);
+router.get("/:id", cacheControl(30), productController.getProductById);
 
 router.post(
     "/",
@@ -31,10 +35,6 @@ router.post(
         }
     },
 );
-
-router.get("/", productController.getProducts);
-
-router.get("/:id", productController.getProductById);
 
 router.patch(
     "/:id",

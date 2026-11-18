@@ -2,11 +2,17 @@ import express from "express";
 import { reviewController } from "./review.controllers";
 import { authenticate } from "../../middlewares/authenticate";
 import { authorize } from "../../middlewares/authorize";
+import { cacheControl } from "../../middlewares/cacheControl";
 
 const router = express.Router();
 
 // Public — storefront-এ product page-এ review দেখানোর জন্য
-router.get("/product/:productId", reviewController.getReviewsByProduct);
+
+router.get(
+    "/product/:productId",
+    cacheControl(60),
+    reviewController.getReviewsByProduct,
+);
 
 // Admin only
 router.get(

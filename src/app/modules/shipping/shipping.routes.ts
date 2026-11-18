@@ -3,11 +3,12 @@ import { shippingController } from "./shipping.controllers";
 import { shippingValidation } from "./shipping.validation";
 import { authenticate } from "../../middlewares/authenticate";
 import { authorize } from "../../middlewares/authorize";
+import { cacheControl } from "../../middlewares/cacheControl";
 
 const router = express.Router();
 
 // Public — customer checkout page-এ charge দেখানোর জন্য
-router.get("/", shippingController.getSettings);
+router.get("/", cacheControl(120), shippingController.getSettings);
 
 // Admin only
 router.patch(

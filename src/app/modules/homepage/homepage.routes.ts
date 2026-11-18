@@ -4,8 +4,20 @@ import { authorize } from "../../middlewares/authorize";
 import { fileUploader } from "../../helpers/fileUploaders";
 import { homepageValidation } from "./homepage.validations";
 import { homepageController } from "./homepage.controllers";
+import { cacheControl } from "../../middlewares/cacheControl";
 
 const router = express.Router();
+
+router.get(
+    "/get-all-banners",
+    cacheControl(120),
+    homepageController.getAllBannerImages,
+);
+router.get(
+    "/get-banner/:id",
+    cacheControl(120),
+    homepageController.getBannerImageById,
+);
 
 router.post(
     "/add-banner",
@@ -23,10 +35,6 @@ router.post(
         }
     },
 );
-
-router.get("/get-all-banners", homepageController.getAllBannerImages);
-
-router.get("/get-banner/:id", homepageController.getBannerImageById);
 
 router.patch(
     "/change-banner-status/:id",
